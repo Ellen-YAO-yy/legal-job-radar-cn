@@ -8,24 +8,26 @@ const exportOffset = source.lastIndexOf("\nexport default {");
 if (exportOffset < 0) throw new Error("Radar source export was not found.");
 
 const runtimePath = resolve(root, ".radar-runtime.mjs");
-writeFileSync(runtimePath, `${source.slice(0, exportOffset)}\nexport { BASELINE, refreshJobs, isDirectApplicationUrl };\n`);
+writeFileSync(runtimePath, `${source.slice(0, exportOffset)}\nexport { BASELINE, refreshJobs, enrichApplicationLinks };\n`);
 
 function logicalKey(job) {
   return `${job.company}|${job.title}`.toLowerCase().replace(/[\s\-_–—（）(),，/]/g, "");
 }
 
-function mergeJobs(isDirectApplicationUrl, ...lists) {
+function mergeJobs(...lists) {
   const byUrl = new Map();
   for (const list of lists) {
     for (const job of list || []) {
-      if (job?.url && job.date_posted >= "2026-07-01" && isDirectApplicationUrl(job)) byUrl.set(job.url, job);
+      if (job?.url && job.date_posted >= "2026-07-01") byUrl.set(job.url, job);
     }
   }
   const logical = new Map();
   for (const job of byUrl.values()) {
     const key = logicalKey(job);
     const prior = logical.get(key);
-    if (!prior || (job.description || "").length > (prior.description || "").length) logical.set(key, job);
+    const score = (job.apply_url ? 10000 : 0) + (job.description || "").length;
+    const priorScore = prior ? (prior.apply_url ? 10000 : 0) + (prior.description || "").length : -1;
+    if (!prior || score > priorScore) logical.set(key, job);
   }
   return [...logical.values()].sort((a, b) => b.date_posted.localeCompare(a.date_posted) || a.company.localeCompare(b.company, "zh-CN"));
 }
@@ -40,9 +42,10 @@ try {
     result = await runtime.refreshJobs({});
   } catch (error) {
     console.warn(`Live search failed; preserving previous snapshot: ${error?.message || error}`);
-    result = { jobs: runtime.BASELINE, last_finished: previous.last_finished, message: "本轮检索失败，已保留上一轮合格结果" };
+    result = { jobs: runtime.BASELINE, last_finished: previous.last_finished, message: "本轮检索失败，已保留上一轮结果" };
   }
-  const jobs = mergeJobs(runtime.isDirectApplicationUrl, runtime.BASELINE, previous.jobs, result.jobs);
+  const merged = mergeJobs(runtime.BASELINE, previous.jobs, result.jobs);
+  const jobs = await runtime.enrichApplicationLinks(merged);
   const snapshot = {
     jobs,
     last_finished: result.last_finished || previous.last_finished || new Date().toISOString(),

@@ -70,9 +70,9 @@ const JOB_SIGNAL_RE = /招聘|职位|岗位|任职要求|岗位职责|工作职�
 const JUNIOR_RE = /校招|校园招聘|应届|毕业生|管培|实习|助理|专员|初级|1\s*[-–—至到]\s*3\s*年|[一二三123]\s*年(?:经验|以上|以内)/i;
 const SENIOR_RE = /(?:[4-9]|[1-9]\d)\s*年(?:以上|经验)/;
 const BLOCKED_LINK_HOST_RE = /(?:^|\.)(?:deizao\.net|yingjiesheng\.com|wondercv\.com|xiaozhaobao\.com\.cn|ultraai\.site|jobui\.com|kanzhun\.com|job592\.com|gaoxiaojob\.com)$/i;
-const RECRUITMENT_PLATFORM_HOST_RE = /(?:^|\.)(?:zhaopin\.com|zhipin\.com|liepin\.com|51job\.com|nowcoder\.com|shixiseng\.com|randstad\.cn|hotjob\.cn|mokahr\.com|myworkdayjobs\.com|workdayjobs\.com|greenhouse\.io|lever\.co|smartrecruiters\.com|successfactors\.com|oraclecloud\.com)$/i;
-const DIRECT_PATH_RE = /\/(?:jobs?|positions?|vacancies|requisitions|interns)\/[^/?#]{3,}|job[_-]?detail|position[_-]?detail|recruitment[_-]?detail|vacancy[_-]?detail|requisition[_-]?detail|post\.html|detail\.html|\/apply(?:\/|$)/i;
-const DIRECT_QUERY_RE = /[?&](?:id|jobid|job_id|positionid|position_id|requisitionid|requisition_id|vacancyid|vacancy_id|postid|code)=[^&#]{2,}/i;
+const RECRUITMENT_PLATFORM_HOST_RE = /(?:^|\.)(?:zhaopin\.com|zhipin\.com|liepin\.com|51job\.com|nowcoder\.com|shixiseng\.com|randstad\.cn|hotjob\.cn|mokahr\.com|zhiye\.com|iguopin\.com|myworkdayjobs\.com|workdayjobs\.com|greenhouse\.io|lever\.co|smartrecruiters\.com|successfactors\.com|oraclecloud\.com)$/i;
+const DIRECT_PATH_RE = /\/(?:jobs?|positions?|vacancies|requisitions|interns|jobdetail|positiondetail)\/[^/?#]{3,}|job[_-]?detail|position[_-]?detail|recruitment[_-]?detail|vacancy[_-]?detail|requisition[_-]?detail|post\.html|detail\.html|\/apply(?:\/|$)/i;
+const DIRECT_QUERY_RE = /[?&](?:id|jobid|job_id|jobcode|job_code|positionid|position_id|requisitionid|requisition_id|vacancyid|vacancy_id|postid|code)=[^&#]{2,}/i;
 const GENERIC_DESTINATION_RE = /\/(?:jobs?|positions?)\/(?:index(?:\.html?)?|home|search|list|campus|social|school)(?:[/?#]|$)/i;
 
 function isDirectApplicationUrl(jobOrUrl) {
@@ -235,7 +235,7 @@ function directLinksFromPage(html, baseUrl) {
   const found = [];
   for (const raw of values) {
     try {
-      const value = raw.replace(/&amp;/gi, "&").replace(/&#39;/gi, "'").replace(/&quot;/gi, '"');
+      const value = raw.replace(/&amp;/gi, "&").replace(/&#39;/gi, "'").replace(/&quot;/gi, '"').replace(/[）)。；，、]+$/g, "");
       const candidate = new URL(value, baseUrl);
       const nested = [candidate.href];
       for (const key of ["url", "target", "redirect", "redirect_url", "link"]) {
@@ -260,22 +260,105 @@ function directSourceName(url) {
   return "企业招聘官网职位页";
 }
 
-async function resolveWebResult(job) {
+async function verifyDirectUrl(rawUrl) {
+  if (!isDirectApplicationUrl(rawUrl)) return "";
+  for (const method of ["HEAD", "GET"]) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 9000);
+    try {
+      const response = await fetch(rawUrl, {
+        method,
+        redirect: "follow",
+        signal: controller.signal,
+        headers: {
+          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/124 Safari/537.36",
+          ...(method === "GET" ? { range: "bytes=0-4095" } : {}),
+        },
+      });
+      if (response.status === 404 || response.status === 410) return "";
+      if (response.status < 500 && isDirectApplicationUrl(response.url || rawUrl)) return response.url || rawUrl;
+    } catch { /* Some recruitment systems reject HEAD; retry with GET. */ }
+    finally { clearTimeout(timeout); }
+  }
+  return "";
+}
+
+async function resolveSearchRedirect(rawUrl) {
+  if (!/^https?:\/\/(?:www\.)?so\.com\/link\?/i.test(rawUrl)) return rawUrl;
   try {
-    if (/^https?:\/\/(?:www\.)?so\.com\/link\?/i.test(job.url)) {
-      const html = await fetchText(job.url);
-      const target = html.match(/window\.location\.replace\(("(?:[^"\\]|\\.)*")\)/i)?.[1];
-      if (target) job.url = JSON.parse(target);
-    }
-    if (!isDirectApplicationUrl(job)) {
-      const html = await fetchText(job.url);
-      const direct = directLinksFromPage(html, job.url)[0];
-      if (direct) job.url = direct;
-    }
-    if (isDirectApplicationUrl(job)) job.source = directSourceName(job.url);
-  } catch { /* Unresolved clues are discarded by the final direct-link filter. */ }
+    const html = await fetchText(rawUrl);
+    const target = html.match(/window\.location\.replace\(("(?:[^"\\]|\\.)*")\)/i)?.[1];
+    return target ? JSON.parse(target) : rawUrl;
+  } catch {
+    return rawUrl;
+  }
+}
+
+async function directLinkFromSearch(job) {
+  const url = new URL("https://www.so.com/s");
+  url.searchParams.set("q", `${job.company} ${job.title} 招聘 投递`);
+  url.searchParams.set("ie", "utf-8");
+  let html;
+  try { html = await fetchText(url.href); } catch { return ""; }
+  const companyNeedle = job.company.replace(/[（(].*?[）)]/g, "").replace(/有限责任公司|股份有限公司|有限公司|集团|银行|证券|保险|律师事务所/g, "").slice(0, 6);
+  const candidates = [];
+  for (const match of html.matchAll(/<li[^>]*class=["'][^"']*res-list[^"']*["'][^>]*>([\s\S]*?)<\/li>/gi)) {
+    const block = match[1];
+    if (companyNeedle.length >= 2 && !decode(block).includes(companyNeedle)) continue;
+    const href = block.match(/<h3[^>]*>[\s\S]*?<a[^>]*href=["']([^"']+)["']/i)?.[1];
+    if (href) candidates.push(decode(href));
+    if (candidates.length >= 8) break;
+  }
+  for (const candidate of candidates) {
+    const resolved = await resolveSearchRedirect(candidate);
+    const direct = await verifyDirectUrl(resolved);
+    if (direct) return direct;
+    try {
+      const page = await fetchText(resolved);
+      for (const link of directLinksFromPage(page, resolved).slice(0, 8)) {
+        const verified = await verifyDirectUrl(link);
+        if (verified) return verified;
+      }
+    } catch { /* Try the next search result. */ }
+  }
+  return "";
+}
+
+async function resolveWebResult(input, allowSearch = true) {
+  const job = { ...input };
+  job.source_url ||= job.url;
+  if (job.apply_url && isDirectApplicationUrl(job.apply_url)) return job;
+  let direct = await verifyDirectUrl(job.source_url);
+  if (!direct) {
+    try {
+      const resolvedSource = await resolveSearchRedirect(job.source_url);
+      direct = await verifyDirectUrl(resolvedSource);
+      if (!direct) {
+        const html = await fetchText(resolvedSource);
+        for (const link of directLinksFromPage(html, resolvedSource).slice(0, 12)) {
+          direct = await verifyDirectUrl(link);
+          if (direct) break;
+        }
+      }
+    } catch { /* Search fallback below. */ }
+  }
+  if (!direct && allowSearch) direct = await directLinkFromSearch(job);
+  job.resolution_attempted_at = new Date().toISOString();
+  if (direct) {
+    job.apply_url = direct;
+    job.apply_source = directSourceName(direct);
+    job.apply_verified_at = new Date().toISOString();
+  }
   job.tags = inferTags(job.company);
   return job;
+}
+
+async function enrichApplicationLinks(jobs) {
+  const enriched = [];
+  for (let index = 0; index < jobs.length; index += 4) {
+    enriched.push(...await Promise.all(jobs.slice(index, index + 4).map(job => resolveWebResult(job, true))));
+  }
+  return enriched;
 }
 
 async function searchSources() {
@@ -322,7 +405,7 @@ async function searchSources() {
     const text = `${job.title} ${job.description}`;
     const listTitle = job.listTitle || job.title;
     const isLegalRole = CORE_RE.test(listTitle) || (GENERIC_POST_RE.test(listTitle) && CORE_RE.test(text));
-    return isLegalRole && (!SENIOR_RE.test(text) || JUNIOR_RE.test(text)) && isDirectApplicationUrl(job);
+    return isLegalRole && (!SENIOR_RE.test(text) || JUNIOR_RE.test(text));
   });
 }
 
@@ -332,8 +415,8 @@ async function readJobs(env) {
     env.DB.prepare("SELECT date_posted, company, title, description, url, tags, source, location FROM jobs WHERE date_posted >= ? ORDER BY date_posted DESC, company ASC").bind(START_DATE).all(),
     env.DB.prepare("SELECT last_started, last_finished, status, message FROM refresh_state WHERE id = 1").first(),
   ]);
-  const merged = new Map(BASELINE.filter(isDirectApplicationUrl).map(job => [job.url, job]));
-  for (const job of jobRows.results || []) if (isDirectApplicationUrl(job)) merged.set(job.url, job);
+  const merged = new Map(BASELINE.map(job => [job.url, job]));
+  for (const job of jobRows.results || []) merged.set(job.url, job);
   const logical = new Map();
   for (const job of merged.values()) {
     const key = `${job.company}|${job.title}`.toLowerCase().replace(/[\s\-_–—（）(),，/]/g, "");
@@ -347,7 +430,7 @@ async function readJobs(env) {
 async function refreshJobs(env) {
   if (!env.DB) {
     const fresh = await searchSources();
-    const merged = new Map(BASELINE.filter(isDirectApplicationUrl).map(job => [job.url, job]));
+    const merged = new Map(BASELINE.map(job => [job.url, job]));
     for (const job of fresh) merged.set(job.url, job);
     const logical = new Map();
     for (const job of merged.values()) {
@@ -369,7 +452,7 @@ async function refreshJobs(env) {
   try {
     const fresh = await searchSources();
     const now = new Date().toISOString();
-    const merged = new Map(BASELINE.filter(isDirectApplicationUrl).map(job => [job.url, job]));
+    const merged = new Map(BASELINE.map(job => [job.url, job]));
     for (const job of fresh) merged.set(job.url, job);
     const statement = env.DB.prepare("INSERT INTO jobs (id, date_posted, company, title, description, url, tags, source, location, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(url) DO UPDATE SET date_posted=excluded.date_posted, company=excluded.company, title=excluded.title, description=excluded.description, tags=excluded.tags, source=excluded.source, location=excluded.location, updated_at=excluded.updated_at");
     const writes = [];

@@ -17,6 +17,7 @@ const staticRefresh = `refresh.addEventListener('click',async()=>{refresh.disabl
 let page = pageMatch[1]
   .replaceAll("法律职位雷达", "法律职位检索")
   .replaceAll("查看职位 ↗", "查看/投递 ↗")
+  .replace("const link=cell('link',''),a=document.createElement('a');a.href=escUrl(job.url);a.target='_blank';a.rel='noreferrer';a.textContent='查看/投递 ↗';link.append(a);tr.append(link);", "const link=cell('link','');if(job.apply_url){const a=document.createElement('a');a.href=escUrl(job.apply_url);a.target='_blank';a.rel='noreferrer';a.textContent='查看/投递 ↗';link.append(a)}else{const pending=document.createElement('span');pending.textContent='直达链接待核验';pending.title='职位信息已保留，系统会继续自动解析并验证投递入口';link.append(pending)}tr.append(link);")
   .replace("重新检索最新职位", "读取最近一次检索结果")
   .replace("页面打开不会自动检索", "每日 09:00、14:00、18:00 自动更新")
   .replace("正在读取上一次保存的结果…", "正在读取最近一次检索结果…")
