@@ -44,7 +44,7 @@ jobs:
           git add data/jobs.json
           if ! git diff --cached --quiet; then
             git commit -m "chore: refresh legal jobs"
-            git push
+            git push || echo "主分支已出现更新；本次继续发布当前检索结果。"
           fi
 
       - name: 构建静态网站
