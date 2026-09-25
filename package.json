@@ -1,0 +1,10 @@
+{
+  "name": "legal-job-radar-cn",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "refresh": "node scripts/refresh-jobs.mjs",
+    "build": "node scripts/build-pages.mjs",
+    "check": "node scripts/check.mjs"
+  }
+}
