@@ -1,6 +1,10 @@
 name: 定时检索并发布法律职位雷达
 
 on:
+  push:
+    branches: ["main"]
+    paths-ignore:
+      - "data/jobs.json"
   schedule:
     # GitHub Actions 使用 UTC。以下对应北京时间 09:00、14:00、18:00。
     - cron: "0 1,6,10 * * *"
