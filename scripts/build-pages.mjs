@@ -15,6 +15,8 @@ const staticLoad = `async function load(){try{const r=await fetch('./jobs.json?v
 const staticRefresh = `refresh.addEventListener('click',async()=>{refresh.disabled=true;wrap.classList.add('loading');state.classList.remove('error');state.textContent='正在读取最近一次定时检索结果…';try{await load();state.textContent='已读取最近一次定时检索结果'}finally{refresh.disabled=false;wrap.classList.remove('loading')}});load();`;
 
 let page = pageMatch[1]
+  .replaceAll("法律职位雷达", "法律职位检索")
+  .replaceAll("查看职位 ↗", "查看/投递 ↗")
   .replace("重新检索最新职位", "读取最近一次检索结果")
   .replace("页面打开不会自动检索", "每日 09:00、14:00、18:00 自动更新")
   .replace("正在读取上一次保存的结果…", "正在读取最近一次检索结果…")
@@ -23,6 +25,7 @@ let page = pageMatch[1]
   .replace(/refresh\.addEventListener\('click',[\s\S]*?\);load\(\);/, staticRefresh);
 
 let pluginPage = pluginMatch[1]
+  .replaceAll("法律职位雷达", "法律职位检索")
   .replaceAll("${PLUGIN_VERSION}", version)
   .replaceAll("${PLUGIN_FILENAME}", filename)
   .replaceAll("${PLUGIN_SHA256}", sha256)
@@ -36,6 +39,6 @@ writeFileSync(resolve(output, "index.html"), page);
 writeFileSync(resolve(output, "resume-autofill/index.html"), pluginPage);
 copyFileSync(resolve(root, `plugin/${filename}`), resolve(output, `downloads/${filename}`));
 copyFileSync(resolve(root, "data/jobs.json"), resolve(output, "jobs.json"));
-writeFileSync(resolve(output, "404.html"), "<!doctype html><meta charset=utf-8><title>页面不存在</title><p>页面不存在。<a href='./'>返回法律职位雷达</a></p>");
+writeFileSync(resolve(output, "404.html"), "<!doctype html><meta charset=utf-8><title>页面不存在</title><p>页面不存在。<a href='./'>返回法律职位检索</a></p>");
 writeFileSync(resolve(output, ".nojekyll"), "");
 console.log(`Built ${output}`);

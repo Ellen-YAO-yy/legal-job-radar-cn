@@ -5,6 +5,11 @@ const PLUGIN_SHA256 = "4bd6a70221a7ef7240a4aaee47bfaec9ba52be97fee701354d75176c4
 const PLUGIN_ARCHIVE_BASE64 = "__PLUGIN_ARCHIVE_BASE64__";
 
 const BASELINE = [
+  ["2026-09-10","北京车之家信息技术有限公司","法务专员（2027校园招聘）","参与合同及法律文书审核、互联网与广告业务合规、知识产权管理、争议解决及法务数字化建设。要求2027届法学专业本科及以上学历，英语六级及法律职业资格、相关实习经历优先。","https://www.nowcoder.com/jobs/detail/466952","民营企业|上市公司集团","牛客招聘职位页","北京"],
+  ["2026-09-08","南京银行股份有限公司","总行定向培训生岗—法律合规方向","通过总行多岗位培养参与金融监管、法律风险研判、合同审核等工作。面向2027届法学类硕士及以上毕业生，民商法、经济法方向优先。","https://www.nowcoder.com/jobs/detail/466977","地方国企|上市公司集团","牛客招聘职位页","南京"],
+  ["2026-09-08","南京银行股份有限公司","法律专业定向培训生岗","培养合同法律审查、诉讼、案件处置及资产保全等银行法律能力。面向2027届法学类本科及以上毕业生，工作地点覆盖南京、苏州和扬州。","https://www.nowcoder.com/jobs/detail/466968","地方国企|上市公司集团","牛客招聘职位页","南京、苏州、扬州"],
+  ["2026-08-26","安克创新科技股份有限公司","海外法务专员（2027校园招聘）","负责中英文合同和法律文件拟制审核、商务谈判支持、业务法律咨询及合同全流程合规管理。要求2027届法律相关专业本科及以上学历，法律职业资格优先。","https://www.nowcoder.com/jobs/detail/463139","民营企业|上市公司集团","牛客招聘职位页","深圳"],
+  ["2026-08-04","未岚大陆（北京）科技有限公司","法律顾问（2027校园招聘）","覆盖境内外合同、跨境业务、海外与数据合规、争议解决及法务运营，涉及欧盟DSA、CRA等监管研究。要求2027届法学硕士，英语可作为工作语言，法律职业资格及相关实习经历优先。","https://www.nowcoder.com/jobs/detail/465672","民营企业","牛客招聘职位页","北京"],
   ["2026-09-24","深圳担保集团有限公司","风控/法务经理（2027校园招聘）","风控方向负责风险资产处置、债务追偿及业务法律风险前置审查；法务方向负责起草审核法律文本、投融资项目合规审查、全面风险与合规管理及政策研究。要求法律或法学类专业硕士研究生及以上学历，通过法律职业资格考试。","https://m.yingjiesheng.com/job-008-096-499.html","地方国企","北京航空航天大学就业信息转载页","深圳"],
   ["2026-09-22","中国移动通信集团云南有限公司","法务合规管理（2027校园招聘）","面向法学、民商法学、知识产权法、宪法与行政法、经济法等专业；要求取得国家法律职业资格A证。岗位分布于省公司及16个州市分公司，网申截止2026年10月15日。","https://job.tiangong.edu.cn/correcruit/content/id/56357.html","央企|上市公司集团|世界500强集团","高校就业中心招聘页","云南省"],
   ["2026-09-22","北京掌上先机网络科技有限公司","法务专员—校招/实习（J15258）","负责合同及其他法律文本的起草、审查和修改，处理合同争议；负责规章制度拟定及法律审核；参与投融资、并购、重组等境内外法律项目。法学相关专业、通过法律职业资格考试或具有企业法务/律所实习经历者优先。","https://career.hebut.edu.cn/home/correcruit/content/id/79519.html","港澳台资","高校就业中心招聘页","北京"],
@@ -37,33 +42,56 @@ const BASELINE = [
 ].map(([date_posted,company,title,description,url,tags,source,location]) => ({date_posted,company,title,description,url,tags,source,location}));
 
 const WEB_QUERIES = [
-  "法务 2027 校园招聘",
-  "法律合规 2027 校园招聘",
-  "法务专员 应届生 招聘 2026",
-  "法律顾问 1-3年 招聘 中国",
-  "涉外律师 海外法务 招聘",
-  "合规专员 法学 应届 招聘",
-  "site:yingjiesheng.com 法务 2027",
-  "site:nowcoder.com/jobs 法务 合规",
-  "site:zhaopin.com 法务 1-3年",
-  "site:zhipin.com 法务 合规 1-3年",
+  "site:zhaopin.com/jobdetail 法务 2027 校园招聘",
+  "site:zhipin.com/job_detail 法务 应届 合规",
+  "site:liepin.com/job 法务 1-3年",
+  "site:jobs.51job.com 法务 应届生",
+  "site:nowcoder.com/jobs/detail 法务 合规",
+  "site:shixiseng.com/interns 法务 合规",
+  "site:mokahr.com 法务 校园招聘 job",
+  "site:hotjob.cn 法务 position detail",
+  "企业招聘官网 法务 2027 校园招聘 jobId",
+  "企业招聘官网 涉外律师 海外法务 职位详情",
 ];
-const DEIZAO_SEARCHES = [
+const DISCOVERY_SEARCHES = [
   ["法务", 1], ["法务", 2], ["法务", 3],
   ["合规", 1], ["合规", 2], ["法律", 1],
 ];
-const DIRECT_SOURCES = [
+const DISCOVERY_SOURCES = [
   { origin: "https://career.hebut.edu.cn", searchPath: "/home/correcruit/index.html", name: "河北工业大学就业指导中心" },
   { origin: "https://job.tiangong.edu.cn", searchPath: "/correcruit/index.html", name: "天津工业大学就业信息网" },
   { origin: "https://career.nankai.edu.cn", searchPath: "/correcruit/index.html", name: "南开大学就业信息网" },
   { origin: "https://career.tjcu.edu.cn", searchPath: "/correcruit/index.html", name: "天津商业大学就业信息网" },
 ];
-const DIRECT_KEYWORDS = ["法务", "合规"];
+const DISCOVERY_KEYWORDS = ["法务", "合规"];
 const CORE_RE = /法务|律师|法律顾问|法律事务|法律专员|合规|知识产权|法规岗|legal|compliance/i;
 const GENERIC_POST_RE = /招聘|校招|招募|简章|公告|岗位汇总|职能类|管理培训生/i;
 const JOB_SIGNAL_RE = /招聘|职位|岗位|任职要求|岗位职责|工作职责|立即投递|校招|社招|应届|毕业生|实习|管培|jobdetail|\/jobs\/|career|hiring|apply|requirements/i;
 const JUNIOR_RE = /校招|校园招聘|应届|毕业生|管培|实习|助理|专员|初级|1\s*[-–—至到]\s*3\s*年|[一二三123]\s*年(?:经验|以上|以内)/i;
 const SENIOR_RE = /(?:[4-9]|[1-9]\d)\s*年(?:以上|经验)/;
+const BLOCKED_LINK_HOST_RE = /(?:^|\.)(?:deizao\.net|yingjiesheng\.com|wondercv\.com|xiaozhaobao\.com\.cn|ultraai\.site|jobui\.com|kanzhun\.com|job592\.com|gaoxiaojob\.com)$/i;
+const RECRUITMENT_PLATFORM_HOST_RE = /(?:^|\.)(?:zhaopin\.com|zhipin\.com|liepin\.com|51job\.com|nowcoder\.com|shixiseng\.com|randstad\.cn|hotjob\.cn|mokahr\.com|myworkdayjobs\.com|workdayjobs\.com|greenhouse\.io|lever\.co|smartrecruiters\.com|successfactors\.com|oraclecloud\.com)$/i;
+const DIRECT_PATH_RE = /\/(?:jobs?|positions?|vacancies|requisitions|interns)\/[^/?#]{3,}|job[_-]?detail|position[_-]?detail|recruitment[_-]?detail|vacancy[_-]?detail|requisition[_-]?detail|post\.html|detail\.html|\/apply(?:\/|$)/i;
+const DIRECT_QUERY_RE = /[?&](?:id|jobid|job_id|positionid|position_id|requisitionid|requisition_id|vacancyid|vacancy_id|postid|code)=[^&#]{2,}/i;
+const GENERIC_DESTINATION_RE = /\/(?:jobs?|positions?)\/(?:index(?:\.html?)?|home|search|list|campus|social|school)(?:[/?#]|$)/i;
+
+function isDirectApplicationUrl(jobOrUrl) {
+  const raw = typeof jobOrUrl === "string" ? jobOrUrl : jobOrUrl?.url;
+  if (!raw) return false;
+  try {
+    const url = new URL(raw);
+    const host = url.hostname.toLowerCase();
+    if (!/^https?:$/.test(url.protocol) || BLOCKED_LINK_HOST_RE.test(host) || /(?:^|\.)so\.com$/.test(host) || /\.edu\.cn$/.test(host)) return false;
+    const target = `${url.pathname}${url.search}`;
+    if (GENERIC_DESTINATION_RE.test(target)) return false;
+    const hasDetail = DIRECT_PATH_RE.test(target) || DIRECT_QUERY_RE.test(target);
+    if (!hasDetail) return false;
+    if (RECRUITMENT_PLATFORM_HOST_RE.test(host)) return true;
+    return /career|careers|jobs?|recruit|join|talent|hire|campus/i.test(`${host}${url.pathname}`);
+  } catch {
+    return false;
+  }
+}
 
 const page = `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>法律职位雷达</title><meta name="description" content="中国内地法律相关校招及初级社招职位汇总"><style>
 :root{--ink:#13273f;--muted:#667487;--line:#dbe1e8;--paper:#fff;--canvas:#eef2f6;--accent:#b58520;--accent-dark:#7a5814;--danger:#a43b35}*{box-sizing:border-box}body{margin:0;background:var(--canvas);color:var(--ink);font:16px/1.55 ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}.shell{width:min(1500px,calc(100% - 40px));margin:0 auto;padding:28px 0 56px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--ink);color:#fff;border-radius:12px;padding:14px 18px;margin-bottom:24px;box-shadow:0 10px 28px rgba(19,39,63,.14)}.topbar-actions{display:flex;align-items:center;justify-content:flex-end;gap:14px}.refresh,.plugin-link{appearance:none;border:0;border-radius:8px;padding:11px 18px;font:750 15px/1 ui-sans-serif,sans-serif;cursor:pointer;text-decoration:none}.refresh{background:#e8c46a;color:#2c2108}.refresh:hover{background:#f1d582}.refresh:disabled{cursor:wait;opacity:.7}.plugin-link{background:#fff;color:var(--ink);white-space:nowrap}.plugin-link:hover{background:#edf2f7}.refresh-state{font-size:14px;color:#dce5ef;text-align:right}.refresh-state.error{color:#ffd0cb}header{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:20px}h1{font-family:Georgia,"Noto Serif SC",serif;font-size:clamp(28px,4vw,44px);line-height:1.1;letter-spacing:-.02em;margin:0}.meta{color:var(--muted);margin:8px 0 0}.count{font-weight:700;color:var(--accent-dark);white-space:nowrap}.filters{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:0 0 16px}.filter-label{font-weight:700;margin-right:4px}.filter-note{color:var(--muted);font-size:14px;margin-left:auto}.tag-filter,.clear-filter{appearance:none;border:1px solid #c9d1dc;background:#fff;color:#34465c;border-radius:999px;padding:8px 13px;font:600 14px/1 ui-sans-serif,sans-serif;cursor:pointer}.tag-filter:hover,.clear-filter:hover{border-color:var(--accent)}.tag-filter[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}.clear-filter{color:var(--accent-dark);border-color:#d8bc7d}.table-wrap{overflow:auto;background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(19,39,63,.08)}table{width:100%;min-width:980px;border-collapse:collapse;table-layout:fixed}th{position:sticky;top:0;z-index:1;background:var(--ink);color:#fff;text-align:left;font-size:14px;font-weight:600;letter-spacing:.04em;padding:15px 18px}td{vertical-align:top;border-bottom:1px solid var(--line);padding:18px;color:#26374d}tbody tr:last-child td{border-bottom:0}tbody tr:hover{background:#f8fafc}th:nth-child(1),td.date{width:132px}th:nth-child(2),td.company{width:190px}th:nth-child(3),td.title{width:230px}th:nth-child(5),td.link{width:132px}td.date{font-variant-numeric:tabular-nums;color:var(--muted)}td.company strong,td.title{font-weight:650}.company-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}.company-tag{display:inline-block;padding:3px 7px;border-radius:4px;background:#edf1f5;color:#516176;font-size:12px;line-height:1.25}td.description{white-space:pre-line;word-break:break-word;color:#46566a}td.link a{display:inline-flex;align-items:center;white-space:nowrap;color:var(--accent-dark);font-weight:700;text-decoration:none;border-bottom:1px solid #d8bc7d}.empty{text-align:center!important;color:var(--muted);padding:64px 24px!important}.loading{opacity:.55}@media(max-width:700px){.shell{width:calc(100% - 24px);padding-top:14px}.topbar,header{align-items:flex-start;flex-direction:column}.topbar-actions{width:100%;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}.refresh-state{text-align:left}.filter-note{width:100%;margin-left:0}.table-wrap{border-radius:9px}}</style></head><body><main class="shell"><section class="topbar" aria-label="网站工具"><button class="refresh" id="refresh" type="button">重新检索最新职位</button><div class="topbar-actions"><div class="refresh-state" id="refresh-state">页面打开不会自动检索</div><a class="plugin-link" href="/resume-autofill">简历自动填充插件</a></div></section><header><div><h1>法律职位雷达</h1><p class="meta" id="meta">中国内地 · 职位发布时间 2026-07-01 至今</p></div><div class="count"><span id="visible-count">—</span> 个职位</div></header><section class="filters" aria-label="按公司属性筛选"><span class="filter-label">公司属性</span><button type="button" class="tag-filter" data-tag="央企" aria-pressed="false">央企</button><button type="button" class="tag-filter" data-tag="地方国企" aria-pressed="false">地方国企</button><button type="button" class="tag-filter" data-tag="民营企业" aria-pressed="false">民营企业</button><button type="button" class="tag-filter" data-tag="外企" aria-pressed="false">外企</button><button type="button" class="tag-filter" data-tag="港澳台资" aria-pressed="false">港澳台资</button><button type="button" class="tag-filter" data-tag="上市公司集团" aria-pressed="false">上市公司集团</button><button type="button" class="tag-filter" data-tag="世界500强集团" aria-pressed="false">世界500强集团</button><button type="button" class="tag-filter" data-tag="律师事务所" aria-pressed="false">律师事务所</button><button type="button" class="clear-filter" id="clear-filter">清除</button><span class="filter-note">多选时仅显示同时符合全部标签的公司</span></section><div class="table-wrap" id="table-wrap" role="region" aria-label="法律职位列表" tabindex="0"><table><thead><tr><th>职位发布时间</th><th>公司名</th><th>职位名</th><th>职位描述</th><th>链接跳转</th></tr></thead><tbody id="jobs"><tr><td class="empty" colspan="5">正在读取上一次保存的结果…</td></tr></tbody></table></div></main><script>
@@ -152,7 +180,7 @@ function parseWebResults(html, query) {
   return rows;
 }
 
-function parseDirectList(html, source) {
+function parseDiscoveryList(html, source) {
   const rows = [];
   for (const block of html.match(/<li>[\s\S]*?<\/li>/gi) || []) {
     const titleMatch = block.match(/<a[^>]*class=["']lizw["'][^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/i);
@@ -166,17 +194,14 @@ function parseDirectList(html, source) {
   return rows;
 }
 
-function parseDeizao(data) {
+function parseDiscoveryFeed(data) {
   const rows = [];
   for (const item of data?.data || []) {
     const date = String(item.dateandtime || "").slice(0, 10);
-    const roles = String(item.jobs || "").split(/[,，;；]/).map(x => x.trim()).filter(x => /\u6cd5务|\u6cd5律|\u5408规|\u5f8b师/i.test(x));
+    const roles = String(item.jobs || "").split(/[,，;；]/).map(x => x.trim()).filter(x => /法务|法律|合规|律师/i.test(x));
     if (date < START_DATE || !item.company || !roles.length) continue;
     const title = roles.slice(0, 4).join(" / ");
-    const tags = new Set(inferTags(item.company).split("|").filter(Boolean));
-    if (item.qylx === "民营企业") tags.add("民营企业");
-    if (item.qylx === "外资企业") tags.add("外企");
-    rows.push({ date_posted: date, company: item.company, title, listTitle: title, description: `${item.title}；工作地点：${item.address || "待核实"}；法律相关岗位：${title}`, url: `https://www.deizao.net/m/index/gonggaoxq/nwid/${item.nid}`, source: "得早学就创公开校招公告", location: item.address || "", tags: [...tags].join("|") });
+    rows.push({ date_posted: date, company: item.company, title, listTitle: title, description: `${item.title}；工作地点：${item.address || "待核实"}；法律相关岗位：${title}`, url: `https://www.deizao.net/m/index/gonggaoxq/nwid/${item.nid}`, source: "公开招聘线索", location: item.address || "", tags: inferTags(item.company) });
   }
   return rows;
 }
@@ -203,16 +228,52 @@ async function fetchText(url, options = {}) {
   } finally { clearTimeout(timeout); }
 }
 
-async function resolveWebResult(job) {
-  if (!/^https?:\/\/(?:www\.)?so\.com\/link\?/i.test(job.url)) {
-    job.tags = inferTags(job.company);
-    return job;
+function directLinksFromPage(html, baseUrl) {
+  const values = [];
+  for (const match of html.matchAll(/href\s*=\s*["']([^"']+)["']/gi)) values.push(match[1]);
+  for (const match of html.matchAll(/https?:\\?\/\\?\/[^\s"'<>]+/gi)) values.push(match[0].replace(/\\\//g, "/"));
+  const found = [];
+  for (const raw of values) {
+    try {
+      const value = raw.replace(/&amp;/gi, "&").replace(/&#39;/gi, "'").replace(/&quot;/gi, '"');
+      const candidate = new URL(value, baseUrl);
+      const nested = [candidate.href];
+      for (const key of ["url", "target", "redirect", "redirect_url", "link"]) {
+        const target = candidate.searchParams.get(key);
+        if (target) nested.push(new URL(target, baseUrl).href);
+      }
+      for (const href of nested) if (isDirectApplicationUrl(href) && !found.includes(href)) found.push(href);
+    } catch { /* Ignore malformed links. */ }
   }
+  return found;
+}
+
+function directSourceName(url) {
+  const host = new URL(url).hostname.replace(/^www\./, "");
+  if (/zhaopin\.com$/.test(host)) return "智联招聘职位页";
+  if (/zhipin\.com$/.test(host)) return "BOSS直聘职位页";
+  if (/liepin\.com$/.test(host)) return "猎聘职位页";
+  if (/51job\.com$/.test(host)) return "前程无忧职位页";
+  if (/nowcoder\.com$/.test(host)) return "牛客招聘职位页";
+  if (/shixiseng\.com$/.test(host)) return "实习僧职位页";
+  if (/randstad\.cn$/.test(host)) return "Randstad招聘职位页";
+  return "企业招聘官网职位页";
+}
+
+async function resolveWebResult(job) {
   try {
-    const html = await fetchText(job.url);
-    const target = html.match(/window\.location\.replace\(("(?:[^"\\]|\\.)*")\)/i)?.[1];
-    if (target) job.url = JSON.parse(target);
-  } catch { /* Keep the indexed URL when the original destination cannot be resolved. */ }
+    if (/^https?:\/\/(?:www\.)?so\.com\/link\?/i.test(job.url)) {
+      const html = await fetchText(job.url);
+      const target = html.match(/window\.location\.replace\(("(?:[^"\\]|\\.)*")\)/i)?.[1];
+      if (target) job.url = JSON.parse(target);
+    }
+    if (!isDirectApplicationUrl(job)) {
+      const html = await fetchText(job.url);
+      const direct = directLinksFromPage(html, job.url)[0];
+      if (direct) job.url = direct;
+    }
+    if (isDirectApplicationUrl(job)) job.source = directSourceName(job.url);
+  } catch { /* Unresolved clues are discarded by the final direct-link filter. */ }
   job.tags = inferTags(job.company);
   return job;
 }
@@ -224,57 +285,44 @@ async function searchSources() {
     url.searchParams.set("ie", "utf-8");
     return parseWebResults(await fetchText(url.href), query);
   });
-  const directRequests = DIRECT_SOURCES.flatMap(source => DIRECT_KEYWORDS.map(keyword => async () => {
+  const discoveryTasks = DISCOVERY_SOURCES.flatMap(source => DISCOVERY_KEYWORDS.map(keyword => async () => {
     const body = new URLSearchParams({ keywords: keyword, sel_cate: "0", sel_area: "0" });
     const html = await fetchText(`${source.origin}${source.searchPath}`, { method: "POST", body, headers: { "content-type": "application/x-www-form-urlencoded" } });
-    return parseDirectList(html, source);
+    return parseDiscoveryList(html, source);
   }));
-  const deizaoRequests = DEIZAO_SEARCHES.map(([keyword, page]) => async () => {
+  const feedTasks = DISCOVERY_SEARCHES.map(([keyword, page]) => async () => {
     const body = new URLSearchParams({ keyw: keyword, page: String(page) });
     const raw = await fetchText("https://www.deizao.net/m/index/ajaxloading", { method: "POST", body, headers: { "content-type": "application/x-www-form-urlencoded" } });
-    return parseDeizao(JSON.parse(raw));
+    return parseDiscoveryFeed(JSON.parse(raw));
   });
   const resultLists = [];
   for (let i = 0; i < webTasks.length; i += 2) {
     const batch = await Promise.allSettled(webTasks.slice(i, i + 2).map(run => run()));
     for (const result of batch) if (result.status === "fulfilled") resultLists.push(result.value.sort((a, b) => b.date_posted.localeCompare(a.date_posted)));
   }
-  const directSettled = await Promise.allSettled(directRequests.map(run => run()));
-  for (const result of directSettled) {
-    if (result.status !== "fulfilled") continue;
-    resultLists.push(result.value.sort((a, b) => b.date_posted.localeCompare(a.date_posted)));
-  }
-  const deizaoSettled = await Promise.allSettled(deizaoRequests.map(run => run()));
-  for (const result of deizaoSettled) {
-    if (result.status !== "fulfilled") continue;
-    resultLists.push(result.value.sort((a, b) => b.date_posted.localeCompare(a.date_posted)));
+  for (const tasks of [discoveryTasks, feedTasks]) {
+    const settled = await Promise.allSettled(tasks.map(run => run()));
+    for (const result of settled) if (result.status === "fulfilled") resultLists.push(result.value.sort((a, b) => b.date_posted.localeCompare(a.date_posted)));
   }
   if (!resultLists.length) throw new Error("公开招聘源暂时均不可用");
   const found = new Map();
-  for (let round = 0; found.size < 40 && round < 12; round += 1) {
+  for (let round = 0; found.size < 80 && round < 20; round += 1) {
     for (const list of resultLists) {
       const job = list[round];
       if (job) found.set(`${job.company}|${job.title}`.replace(/\s+/g, ""), job);
-      if (found.size >= 40) break;
+      if (found.size >= 80) break;
     }
   }
   const candidates = [...found.values()];
   const resolved = [];
-  let remainingRedirects = 20;
   for (let i = 0; i < candidates.length; i += 5) {
-    resolved.push(...await Promise.all(candidates.slice(i, i + 5).map(job => {
-      if (/^https?:\/\/(?:www\.)?so\.com\/link\?/i.test(job.url) && remainingRedirects-- <= 0) {
-        job.tags = inferTags(job.company);
-        return job;
-      }
-      return resolveWebResult(job);
-    })));
+    resolved.push(...await Promise.all(candidates.slice(i, i + 5).map(resolveWebResult)));
   }
   return resolved.filter(job => {
     const text = `${job.title} ${job.description}`;
     const listTitle = job.listTitle || job.title;
     const isLegalRole = CORE_RE.test(listTitle) || (GENERIC_POST_RE.test(listTitle) && CORE_RE.test(text));
-    return isLegalRole && (!SENIOR_RE.test(text) || JUNIOR_RE.test(text));
+    return isLegalRole && (!SENIOR_RE.test(text) || JUNIOR_RE.test(text)) && isDirectApplicationUrl(job);
   });
 }
 
@@ -284,8 +332,8 @@ async function readJobs(env) {
     env.DB.prepare("SELECT date_posted, company, title, description, url, tags, source, location FROM jobs WHERE date_posted >= ? ORDER BY date_posted DESC, company ASC").bind(START_DATE).all(),
     env.DB.prepare("SELECT last_started, last_finished, status, message FROM refresh_state WHERE id = 1").first(),
   ]);
-  const merged = new Map(BASELINE.map(job => [job.url, job]));
-  for (const job of jobRows.results || []) merged.set(job.url, job);
+  const merged = new Map(BASELINE.filter(isDirectApplicationUrl).map(job => [job.url, job]));
+  for (const job of jobRows.results || []) if (isDirectApplicationUrl(job)) merged.set(job.url, job);
   const logical = new Map();
   for (const job of merged.values()) {
     const key = `${job.company}|${job.title}`.toLowerCase().replace(/[\s\-_–—（）(),，/]/g, "");
@@ -299,7 +347,7 @@ async function readJobs(env) {
 async function refreshJobs(env) {
   if (!env.DB) {
     const fresh = await searchSources();
-    const merged = new Map(BASELINE.map(job => [job.url, job]));
+    const merged = new Map(BASELINE.filter(isDirectApplicationUrl).map(job => [job.url, job]));
     for (const job of fresh) merged.set(job.url, job);
     const logical = new Map();
     for (const job of merged.values()) {
@@ -321,7 +369,7 @@ async function refreshJobs(env) {
   try {
     const fresh = await searchSources();
     const now = new Date().toISOString();
-    const merged = new Map(BASELINE.map(job => [job.url, job]));
+    const merged = new Map(BASELINE.filter(isDirectApplicationUrl).map(job => [job.url, job]));
     for (const job of fresh) merged.set(job.url, job);
     const statement = env.DB.prepare("INSERT INTO jobs (id, date_posted, company, title, description, url, tags, source, location, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(url) DO UPDATE SET date_posted=excluded.date_posted, company=excluded.company, title=excluded.title, description=excluded.description, tags=excluded.tags, source=excluded.source, location=excluded.location, updated_at=excluded.updated_at");
     const writes = [];
